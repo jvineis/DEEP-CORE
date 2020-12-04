@@ -39,4 +39,30 @@ Analysis of Metagenomic Data from four salt marsh sediment samples.
     READS=$(sed -n "$SLURM_ARRAY_TASK_ID"p x_file-names-of-reads-to-map.txt)
     python ~/scripts/estimate-MAG-coverage-from-bbmap-covstats-v2.py --mappingfile ${READS}.covstats.txt --out ${READS}-MAG-bbmap-Avg-fold.txt --ids x_all-MAG-ids.txt
     
+##### This is what the first few lines of the resulting *MAG-bbmap-Avg-fold.txt* file looks like.
+
+    a_s_SalMarSW160110MG_3_12718.2.279671.TCGGTTAC-GTAACCGA.covstats.txt	stat
+    s_SalMarSW160110MG_3_8930491_Bin_10_1	17.9314
+    s_SalMarSW160110MG_3_8930491_Bin_12_1	4.7454
+    s_SalMarSW160110MG_3_8930491_Bin_12_2	5.8875
+    s_SalMarSW160110MG_3_8930491_Bin_14_contigs	11.6489
+    s_SalMarSW160110MG_3_8930491_Bin_16_contigs	14.0543
+    
 ### 4. Therefore, we have an average of averages reported for each of our MAGs.  We need to correct this for the number of reads available in order to be able to compare the relative of a bin across samples. If we divide this number by the Mbp within each dataset, we have an estimate the *relative average fold coverage/Mbp*. The Mbp is equivalent to the "millions of base pairs" in a sample.  So if we have 2,000,000 nucleotides (I don't mean reads here, I mean nucleotides!) in our short read data, then the Mbp would be 2. Once I past together each of the "MAG-bbmap-Avg-fold.txt" file, I run this script to tabulate the relative fold coverage per sample. 
+
+## Improved relative abundance for each of the MAGs. I created a script that will calculate the reads per Kbp per Mbp of sequenicng data (RPKM) for each MAG across all samples specified. Here is what the sbatch looks like. [reads mapped to MAG]/[total MAG length (/1000)] / [total nt in metagenomic sample/1000000]. This calculation is corrected for the side of the genome and the number of reads in the dataset allowing for comparison of MAGs within and across all samples.
+
+
+#### Working from this directory /scratch/vineis.j/DEEP_CORE/ALL-MAGS 
+
+    #!/bin/bash
+    #
+    #SBATCH --nodes=2
+    #SBATCH --tasks-per-node=1
+    #SBATCH --mem=100Gb
+    #SBATCH --partition=short
+    #SBATCH --time=23:00:00
+    python ~/scripts/estimate-MAG-coverage-from-bbmap-covstats-v3.py --mapping /scratch/vineis.j/DEEP_CORE/ALL-MAGS/ --out x_ALL-MAG-RPKM-matrix-short-partition.txt --ids x_all-MAG-ids.txt --nts x_nt-per-sample.txt
+    
+    
+
