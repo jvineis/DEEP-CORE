@@ -1,6 +1,10 @@
 # DEEP-CORE
 Analysis of Metagenomic Data from four salt marsh sediment samples.
-## Lets start with relative abundance for each of the MAGs.  
+## Binning
+
+### 1. Map the reads using bowtie2 to reference assemblies. This step was conducted so that only reads from nearby depths were mapped back to the assembly.  We organized the samples into eight different groups 
+
+## Relative abundance for each of the MAGs.  
 
 ### 1. Map the short reads from each metagenomic sample to the collection of scaffolds containing all scaffolds for all MAGs. This is the slurm script that I use, but you can see that bbmap was the mapper of choice here. These are reads derived from JGI, which are interleaved fastq files. The ref file is the fasta file containing all scaffolds for all MAGs.
 
