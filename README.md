@@ -1,7 +1,10 @@
 # DEEP-CORE
 Analysis of Metagenomic Data from four salt marsh sediment samples.
+JGI PROJECT:  Combining high resolution organic matter characterization and microbial meta-omics to assess the effects of nutrient loading on salt marsh carbon sequestration
+JGI LINK: https://genome.jgi.doe.gov/portal/Comhiguestration/Comhiguestration.info.html
+JGI PROJECT ID: 503576
 
-## Get the assemblies for each of the samples using the curl commands found in this file deep-core-get-assemblies.shx.. GLOBUS download would be a better alternative to all those curl scripts.
+## Get the assemblies for each of the samples using the curl commands found in this file deep-core-get-assemblies.shx.. GLOBUS download would be a better alternative to all those curl scripts and you can access this using the JGI LINK above.
 ## Get the short reads for each of the samples from JGI. I would recommend usin GLOBUS
 ## Binning
 ### 1. fix the assemblies so that we are dealing with contig names that makes downstream programs happy and filter contigs that are below 2500 nt.
@@ -73,7 +76,7 @@ Analysis of Metagenomic Data from four salt marsh sediment samples.
     anvi-gen-contigs-database -f ASSEMBLIES/${ASSEMBLY}_filter_contigs.fa -o ASSEMBLIES/${ASSEMBLY}_filter_contigs.db
     anvi-run-hmms -c ASSEMBLIES/${ASSEMBLY}_filter_contigs.db
 
-### 4. Profile each of the mapping files using a similar approach to the mapping 
+### 4. Profile each of the mapping files using a similar approach to the mapping.  I created a list of the bam files for each of the depth categories to facilitate this process.
   
     #!/bin/bash
     #
@@ -86,18 +89,16 @@ Analysis of Metagenomic Data from four salt marsh sediment samples.
     anvi-profile -i MAPPING/${MAPPING_BAM} -c ASSEMBLIES/${ASSEMBLY}_filter_contigs.db -M 3000 -o MAPPING/${MAPPING_BAM}-PROFILE -T 40
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #!bin/bash
-     for ASSEMBLY in `cat assemblies_110_120_130.txt`; do for MAPPING_BAM in `cat bams_110_120_130.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
-    for ASSEMBLY in `cat assemblies_140_150_170.txt`; do for MAPPING_BAM in `cat bams_140_150_170.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
-    for ASSEMBLY in `cat assemblies_190_200_210.txt`; do for MAPPING_BAM in `cat bams_190_200_210.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
-    for ASSEMBLY in `cat assemblies_220_230_240.txt`; do for MAPPING_BAM in `cat bams_220_230_240.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
-    for ASSEMBLY in `cat assemblies_270_290_310.txt`; do for MAPPING_BAM in `cat bams_270_290_310.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
-    for ASSEMBLY in `cat assemblies_320_330_340.txt`; do for MAPPING_BAM in `cat bams_320_330_340.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
-    for ASSEMBLY in `cat assemblies_370_390_410.txt`; do for MAPPING_BAM in `cat bams_370_390_410.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
-    for ASSEMBLY in `cat assemblies_420_430_440.txt`; do for MAPPING_BAM in `cat bams_420_430_440.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+     for ASSEMBLY in `cat assemblies_110_120_130.txt`; do for MAPPING_BAM in `cat bams_110_120_130.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 03_profiling_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_140_150_170.txt`; do for MAPPING_BAM in `cat bams_140_150_170.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 03_profiling_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_190_200_210.txt`; do for MAPPING_BAM in `cat bams_190_200_210.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 03_profiling_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_220_230_240.txt`; do for MAPPING_BAM in `cat bams_220_230_240.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 03_profiling_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_270_290_310.txt`; do for MAPPING_BAM in `cat bams_270_290_310.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 03_profiling_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_320_330_340.txt`; do for MAPPING_BAM in `cat bams_320_330_340.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 03_profiling_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_370_390_410.txt`; do for MAPPING_BAM in `cat bams_370_390_410.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 03_profiling_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_420_430_440.txt`; do for MAPPING_BAM in `cat bams_420_430_440.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 03_profiling_master.shx; sleep 1; done; done
 
-    
-
-
+### 5. Merge the profiles for each of the assemblies.
 
 ## Relative abundance for each of the MAGs.  
 
