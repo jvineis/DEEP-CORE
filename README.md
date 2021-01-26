@@ -31,25 +31,25 @@ Analysis of Metagenomic Data from four salt marsh sediment samples.
     for ASSEMBLY in `cat assemblies_370_390_410.txt`; do for READS in `cat reads_370_390_410.txt`; do echo "${ASSEMBLY}, ${READS}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
     for ASSEMBLY in `cat assemblies_420_430_440.txt`; do for READS in `cat reads_420_430_440.txt`; do echo "${ASSEMBLY}, ${READS}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
 
+### 2. Format the assembly to make ANVIO happy 
 
-2.  The next step is to construct a contigs database for each of the assemblies.
+
+### 3. The next step is to construct a contigs database for each of the assemblies.
 
     #!/bin/bash
     #
     #SBATCH --nodes=1
-    #SBATCH --tasks-per-node=1
-    #SBATCH --time=6:00:00
-    #SBATCH --mem=100Gb
-    #SBATCH --partition=short
-    ##SBATCH --array=1-5
+    #SBATCH --tasks-per-node=20
+    #SBATCH --time=06:00:00
+    #SBATCH --mem=250Gb
+    #SBATCH --partition=general
+    ##SBATCH --array=1-55
 
-    ASSEMBLY=$(sed -n "$SLURM_ARRAY_TASK_ID"p x_one-list-to-redo-v6.txt)
+    ASSEMBLY=$(sed -n "$SLURM_ARRAY_TASK_ID"p x_assemblies.txt)
     anvi-gen-contigs-database -f ASSEMBLIES/${ASSEMBLY}_filter_contigs.fa -o ASSEMBLIES/${ASSEMBLY}_filter_contigs.db
     anvi-run-hmms -c ASSEMBLIES/${ASSEMBLY}_filter_contigs.db
 
 
-
-  
 ## Relative abundance for each of the MAGs.  
 
 ### 1. Map the short reads from each metagenomic sample to the collection of scaffolds containing all scaffolds for all MAGs. This is the slurm script that I use, but you can see that bbmap was the mapper of choice here. These are reads derived from JGI, which are interleaved fastq files. The ref file is the fasta file containing all scaffolds for all MAGs.
