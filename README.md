@@ -2,8 +2,54 @@
 Analysis of Metagenomic Data from four salt marsh sediment samples.
 ## Binning
 
-### 1. Map the reads using bowtie2 to reference assemblies. This step was conducted so that only reads from nearby depths were mapped back to the assembly.  We organized the samples into eight different groups 
+### 1. Map the reads using bowtie2 to reference assemblies. This step was conducted so that only reads from nearby depths were mapped back to the assembly.  We organized the samples into eight different groups based on depth range. Below is a table of the group different groups
 
+     110_120_130
+     140_150_170
+     190_200_210
+     220_230_240
+     270_290_310
+     320_330_340
+     370_390_410
+     420_430_440
+     
+#### 1a. This is what the SLURM mapping script looked like.  Apologies, I did not know abut arrays yet.
+
+    #!bin/bash
+    #This is how I run the mapping for each of the asssemblies, but limited to reads that are derived from similar depths.
+
+    #I made separate "assembly" and "reads" files that contain subsets of three adjacent depths.  This is not perfect, but should allow for increased stability during binning
+
+    # here are the for loops i used to execute the mapping commands
+
+    for ASSEMBLY in `cat assemblies_110_120_130.txt`; do for READS in `cat reads_110_120_130.txt`; do echo "${ASSEMBLY}, ${READS}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_140_150_170.txt`; do for READS in `cat reads_140_150_170.txt`; do echo "${ASSEMBLY}, ${READS}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_190_200_210.txt`; do for READS in `cat reads_190_200_210.txt`; do echo "${ASSEMBLY}, ${READS}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_220_230_240.txt`; do for READS in `cat reads_220_230_240.txt`; do echo "${ASSEMBLY}, ${READS}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_270_290_310.txt`; do for READS in `cat reads_270_290_310.txt`; do echo "${ASSEMBLY}, ${READS}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_320_330_340.txt`; do for READS in `cat reads_320_330_340.txt`; do echo "${ASSEMBLY}, ${READS}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_370_390_410.txt`; do for READS in `cat reads_370_390_410.txt`; do echo "${ASSEMBLY}, ${READS}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_420_430_440.txt`; do for READS in `cat reads_420_430_440.txt`; do echo "${ASSEMBLY}, ${READS}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+
+
+2.  The next step is to construct a contigs database for each of the assemblies.
+
+    #!/bin/bash
+    #
+    #SBATCH --nodes=1
+    #SBATCH --tasks-per-node=1
+    #SBATCH --time=6:00:00
+    #SBATCH --mem=100Gb
+    #SBATCH --partition=short
+    ##SBATCH --array=1-5
+
+    ASSEMBLY=$(sed -n "$SLURM_ARRAY_TASK_ID"p x_one-list-to-redo-v6.txt)
+    anvi-gen-contigs-database -f ASSEMBLIES/${ASSEMBLY}_filter_contigs.fa -o ASSEMBLIES/${ASSEMBLY}_filter_contigs.db
+    anvi-run-hmms -c ASSEMBLIES/${ASSEMBLY}_filter_contigs.db
+
+
+
+  
 ## Relative abundance for each of the MAGs.  
 
 ### 1. Map the short reads from each metagenomic sample to the collection of scaffolds containing all scaffolds for all MAGs. This is the slurm script that I use, but you can see that bbmap was the mapper of choice here. These are reads derived from JGI, which are interleaved fastq files. The ref file is the fasta file containing all scaffolds for all MAGs.
