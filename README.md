@@ -1,8 +1,22 @@
 # DEEP-CORE
 Analysis of Metagenomic Data from four salt marsh sediment samples.
-## Binning
 
-### 1. Map the reads using bowtie2 to reference assemblies. This step was conducted so that only reads from nearby depths were mapped back to the assembly.  We organized the samples into eight different groups based on depth range. Below is a table of the group different groups
+## Get the assemblies for each of the samples using the curl commands found in this file deep-core-get-assemblies.shx.. GLOBUS download would be a better alternative to all those curl scripts.
+## Get the short reads for each of the samples from JGI. I would recommend usin GLOBUS
+## Binning
+### 1. fix the assemblies so that we are dealing with contig names that makes downstream programs happy and filter contigs that are below 2500 nt.
+ 
+     #!/bin/bash
+     #SBATCH --nodes=1
+     #SBATCH --time=01:00:00
+     #SBATCH --partition=express
+     #SBATCH --array=1-55
+     ASSEMBLY=$(sed -n "$SLURM_ARRAY_TASK_ID"p samples.txt)
+     
+     anvi-script-reformat-fasta ${ASSEMBLY}-final.contigs.fasta --simplify-names -o ${ASSEMBLY}_filter_contigs.fa -l 2500
+     
+
+### 2. Map the short reads using bowtie2 to reference assemblies ending in "filter_contigs.fa" created in step 1. This step was conducted so that only reads from nearby depths were mapped back to the assembly.  We organized the samples into eight different groups based on depth range. Below is a table of the group different groups
 
      110_120_130
      140_150_170
@@ -13,7 +27,20 @@ Analysis of Metagenomic Data from four salt marsh sediment samples.
      370_390_410
      420_430_440
      
-#### 1a. This is what the SLURM mapping script looked like.  Apologies, I did not know abut arrays yet.
+#### 2a. This is what the two SLURM mapping scripts look like. The first bash script (00_mapping_master.shx) is referenced in the second script.
+
+    #!/bin/bash
+    #
+    #SBATCH --nodes=1
+    #SBATCH --tasks-per-node=1
+    #SBATCH --time=6:00:00
+    #SBATCH --mem=10Gb
+    #SBATCH --partition=general
+
+    bowtie2 -x ASSEMBLIES/${ASSEMBLY} -U QUALITY_READS/${READS} -q -S MAPPING/${ASSEMBLY}_${READS}.sam
+    samtools view -bS -F 4 MAPPING/${ASSEMBLY}_${READS}.sam -o MAPPING/${ASSEMBLY}_${READS}.bam
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     #!bin/bash
     #This is how I run the mapping for each of the asssemblies, but limited to reads that are derived from similar depths.
@@ -31,9 +58,6 @@ Analysis of Metagenomic Data from four salt marsh sediment samples.
     for ASSEMBLY in `cat assemblies_370_390_410.txt`; do for READS in `cat reads_370_390_410.txt`; do echo "${ASSEMBLY}, ${READS}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
     for ASSEMBLY in `cat assemblies_420_430_440.txt`; do for READS in `cat reads_420_430_440.txt`; do echo "${ASSEMBLY}, ${READS}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
 
-### 2. Format the assembly to make ANVIO happy 
-
-
 ### 3. The next step is to construct a contigs database for each of the assemblies.
 
     #!/bin/bash
@@ -48,6 +72,31 @@ Analysis of Metagenomic Data from four salt marsh sediment samples.
     ASSEMBLY=$(sed -n "$SLURM_ARRAY_TASK_ID"p x_assemblies.txt)
     anvi-gen-contigs-database -f ASSEMBLIES/${ASSEMBLY}_filter_contigs.fa -o ASSEMBLIES/${ASSEMBLY}_filter_contigs.db
     anvi-run-hmms -c ASSEMBLIES/${ASSEMBLY}_filter_contigs.db
+
+### 4. Profile each of the mapping files using a similar approach to the mapping 
+  
+    #!/bin/bash
+    #
+    #SBATCH --nodes=10
+    #SBATCH --tasks-per-node=20
+    #SBATCH --time=24:00:00
+    #SBATCH --mem=80Gb
+    #SBATCH --partition=short
+
+    anvi-profile -i MAPPING/${MAPPING_BAM} -c ASSEMBLIES/${ASSEMBLY}_filter_contigs.db -M 3000 -o MAPPING/${MAPPING_BAM}-PROFILE -T 40
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #!bin/bash
+     for ASSEMBLY in `cat assemblies_110_120_130.txt`; do for MAPPING_BAM in `cat bams_110_120_130.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_140_150_170.txt`; do for MAPPING_BAM in `cat bams_140_150_170.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_190_200_210.txt`; do for MAPPING_BAM in `cat bams_190_200_210.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_220_230_240.txt`; do for MAPPING_BAM in `cat bams_220_230_240.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_270_290_310.txt`; do for MAPPING_BAM in `cat bams_270_290_310.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_320_330_340.txt`; do for MAPPING_BAM in `cat bams_320_330_340.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_370_390_410.txt`; do for MAPPING_BAM in `cat bams_370_390_410.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+    for ASSEMBLY in `cat assemblies_420_430_440.txt`; do for MAPPING_BAM in `cat bams_420_430_440.txt`; do echo "${ASSEMBLY}, ${MAPPING_BAM}"; export ASSEMBLY READS; sbatch 00_mapping_master.shx; sleep 1; done; done
+
+    
+
 
 
 ## Relative abundance for each of the MAGs.  
