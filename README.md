@@ -164,8 +164,21 @@ JGI PROJECT ID: 503576
     #SBATCH --time=23:00:00
     python ~/scripts/estimate-MAG-coverage-from-bbmap-covstats-v3.py --mapping /scratch/vineis.j/DEEP_CORE/ALL-MAGS/ --out x_ALL-MAG-RPKM-matrix-short-partition.txt --ids x_all-MAG-ids.txt --nts x_nt-per-sample.txt
     
-## PHYLOGENOMICS: Here we outline the steps to generate the phylogenetic tree for the manuscript.  Step one is to create a list of the ribosomal proteins that we will use to create our phylogeny. Ribosomal proteins are routinely used to estimate phylogenetic relationships and here is a list of the genes that we use in a file called "x_gene-names.txt". NOTE: I was working here /work/jennifer.bowen/DEEP-CORE/ALL-MAGS during the creation of this tutorial.
+## PHYLOGENOMICS: Here we outline the steps to generate the phylogenetic tree for the manuscript.  Step one is to create a list of the ribosomal proteins that we will use to create our phylogeny. Ribosomal proteins are routinely used to estimate phylogenetic relationships and here is a list of the genes that we use in a file called "x_gene-names.txt" and another file to get started in the external-genomes.txt file (both are contained in this repository . NOTE: I was working here /work/jennifer.bowen/DEEP-CORE/ALL-MAGS during the creation of this tutorial. 
 
+### 1. Start with running the command to pull out concatenated genes for each of the MAGs and then create the tree.  All this hapens using this amazing script.
 
- 
+    #!/bin/bash
+    #
+    #SBATCH --nodes=1
+    #SBATCH --tasks-per-node=1
+    SBATCH --time=10:00:00
+    #SBATCH --mem=200Gb
+    #SBATCH --partition=short
 
+    #ANVIO 6.2
+
+    anvi-get-sequences-for-hmm-hits --external-genomes external-genomes.txt -o x_concatenated-ribosomal-proteins.fa --hmm-source Campbell_et_al --gene-names
+     x_gene-names.txt --return-best-hit --get-aa-sequences --concatenate
+
+    anvi-gen-phylogenetic-tree -f x_concatenated-ribosomal-proteins.fa -o x_phylogenomic-ribosomal-tree.txt
