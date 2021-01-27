@@ -164,5 +164,8 @@ JGI PROJECT ID: 503576
     #SBATCH --time=23:00:00
     python ~/scripts/estimate-MAG-coverage-from-bbmap-covstats-v3.py --mapping /scratch/vineis.j/DEEP_CORE/ALL-MAGS/ --out x_ALL-MAG-RPKM-matrix-short-partition.txt --ids x_all-MAG-ids.txt --nts x_nt-per-sample.txt
     
-    
+## PHYLOGENOMICS: Here we outline the steps to generate the phylogenetic tree for the manuscript.  Step one is to create a list of the ribosomal proteins that we will use to create our phylogeny. Ribosomal proteins are routinely used to estimate phylogenetic relationships and here is a list of the genes that we use in a file called "x_gene-names.txt". NOTE: I was working here /work/jennifer.bowen/DEEP-CORE/ALL-MAGS during the creation of this tutorial.
+
+
+ 
 
