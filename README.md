@@ -178,7 +178,84 @@ JGI PROJECT ID: 503576
 
     #ANVIO 6.2
 
-    anvi-get-sequences-for-hmm-hits --external-genomes external-genomes.txt -o x_concatenated-ribosomal-proteins.fa --hmm-source Campbell_et_al --gene-names
-     x_gene-names.txt --return-best-hit --get-aa-sequences --concatenate
+    anvi-get-sequences-for-hmm-hits --external-genomes -o x_concatenated-ribosomal-proteins-15.fa --hmm-source Campbell_et_al --gene-names x_gene-names.txt --return-best-hit --get-aa-sequences --concatenate --max-num-genes-missing-from-bin 15
 
-    anvi-gen-phylogenetic-tree -f x_concatenated-ribosomal-proteins.fa -o x_phylogenomic-ribosomal-tree.txt
+    anvi-gen-phylogenetic-tree -f x_concatenated-ribosomal-proteins-15.fa -o x_phylogenomic-ribosomal-tree.tre
+    
+
+## ANI at the phylum level. Because the number of MAGs is so large, I partitioned the ANI analysis by phylum. 
+
+### 1. I started by making text files that contain the names of the taxa for each of 15 major phyla identified in the DEEP-CORE based on the taxonomic assigment of the gtdbtk. I did not include the phyla that contained a single genome... Obviously!
+    
+    (base) [vineis.j@login-01 ALL-MAGS]$ cut -f 2 x_GTDBtk-OUTPUT-real-new-mags-included-multi-cpu/gtdbtk.ar122.summary.tsv | cut -f 2 -d ";" | sort | uniq -c
+      1 classification
+     26 p__Aenigmarchaeota
+     51 p__Asgardarchaeota
+     72 p__Crenarchaeota
+     15 p__Euryarchaeota
+      1 p__Halobacterota
+     33 p__Nanoarchaeota
+     12 p__Thermoplasmatota
+    
+    (base) [vineis.j@login-01 ALL-MAGS]$ cut -f 2 x_GTDBtk-OUTPUT-real-new-mags-included-multi-cpu/gtdbtk.bac120.summary.tsv | cut -f 2 -d ";" | sort | uniq -c
+      1 classification
+      4 p__AABM5-125-24
+     65 p__Acidobacteriota
+    127 p__Actinobacteriota
+     34 p__Aerophobota
+    178 p__Bacteroidota
+     52 p__Bipolaricaulota
+     17 p__Caldatribacteriota
+     10 p__Calditrichota
+      4 p__Campylobacterota
+    524 p__Chloroflexota
+     29 p__Chloroflexota_A
+      5 p__Cloacimonadota
+      1 p__Dadabacteria
+      8 p__Deinococcota
+      3 p__Dependentiae
+    200 p__Desulfobacterota
+      1 p__Desulfobacterota_A
+      3 p__Eisenbacteria
+      4 p__FCPU426
+      1 p__Fermentibacterota
+      1 p__Fibrobacterota
+     15 p__Gemmatimonadota
+      2 p__Hydrogenedentota
+      3 p__Krumholzibacteriota
+      4 p__KSB1
+     18 p__Marinisomatota
+      1 p__MBNT15
+      1 p__Methylomirabilota
+      6 p__Myxococcota
+      3 p__Nitrospirota
+      9 p__Omnitrophota
+    147 p__Patescibacteria
+    271 p__Planctomycetota
+    116 p__Proteobacteria
+      2 p__RBG-13-66-14
+      1 p__SM23-31
+     61 p__Spirochaetota
+     24 p__TA06_A
+     12 p__UBP3
+      4 p__UBP7_A
+      6 p__Verrucomicrobiota_A
+     13 p__WOR-3
+    112 p__WOR-3_B
+     32 p__Zixibacteria
+     
+    cat x_BAC-PHYLA.txt x_ARC-PHYLA.txt > x_PHYLA-list.txt
+
+#### I manually removed the phyla that contained a single MAG
+
+### 2. Create a list for each of the phyla contained in the x_PHYLA-list.txt file.
+  
+  
+    cat x_GTDBtk-OUTPUT-real-new-mags-included-multi-cpu/gtdbtk*12*.summary.tsv | sort > x_all_gtdbtk-output.txt
+    
+##### I manually removed the last two lines of the x_all_gtdbtk-output.txt file that contained header information.. then
+
+    for i in `cat x_PHYLA-list.txt`; do grep $i x_all_gtdbtk-output.txt | cut -f 1 > x_$i-list.txt; done
+    for i in `cat x_PHYLA-list.txt`; do python x_make-external-genomes-from-list.py x_$i-list.txt x_$i-external-genomes.txt; done
+    
+
