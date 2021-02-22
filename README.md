@@ -271,5 +271,5 @@ JGI PROJECT ID: 503576
     MAGs=$(sed -n "$SLURM_ARRAY_TASK_ID"p x_PHYLA-list.txt)
 
     anvi-compute-genome-similarity -e x_${MAGs}-external-genomes.txt -o x_ANI-${MAGs} -T 40
-    anvi-dereplicate-genomes --ani-dir x_ANI-${MAGs}/ -o x_ANI_dereplication-${MAGs} --program pyANI --method ANIb --use-full-percent-identity --min-full-percent-identity 0.90 --similarity-threshold 0.95
+    anvi-dereplicate-genomes --ani-dir x_ANI-${MAGs}/ -o x_ANI_dereplication-${MAGs} --program fastANI --method ANIb --use-full-percent-identity --min-full-percent-identity 0.90 --similarity-threshold 0.95
 
