@@ -246,16 +246,30 @@ JGI PROJECT ID: 503576
      
     cat x_BAC-PHYLA.txt x_ARC-PHYLA.txt > x_PHYLA-list.txt
 
-#### I manually removed the phyla that contained a single MAG
+#### I manually removed the phyla that contained a single MAG from the x_PHYLA-list.txt and also the lines that contained the word "classification"
 
 ### 2. Create a list for each of the phyla contained in the x_PHYLA-list.txt file.
-  
-  
+
     cat x_GTDBtk-OUTPUT-real-new-mags-included-multi-cpu/gtdbtk*12*.summary.tsv | sort > x_all_gtdbtk-output.txt
     
-##### I manually removed the last two lines of the x_all_gtdbtk-output.txt file that contained header information.. then
+##### I manually removed the last two lines of the x_all_gtdbtk-output.txt file that contained header information.. then I created a separate external genomes file for each of the phyla.
 
     for i in `cat x_PHYLA-list.txt`; do grep $i x_all_gtdbtk-output.txt | cut -f 1 > x_$i-list.txt; done
     for i in `cat x_PHYLA-list.txt`; do python x_make-external-genomes-from-list.py x_$i-list.txt x_$i-external-genomes.txt; done
     
+### 3. Run ANI for each of the external-genomes files.
+
+    #!/bin/bash
+    #
+    #SBATCH --nodes=1
+    #SBATCH --tasks-per-node=10
+    #SBATCH --time=24:00:00
+    #SBATCH --mem=300Gb
+    #SBATCH --partition=short
+    #SBATCH --array=1-41
+
+    MAGs=$(sed -n "$SLURM_ARRAY_TASK_ID"p x_PHYLA-list.txt)
+
+    anvi-compute-genome-similarity -e x_${MAGs}-external-genomes.txt -o x_ANI-${MAGs} -T 40
+    anvi-dereplicate-genomes --ani-dir x_ANI-${MAGs}/ -o x_ANI_dereplication-${MAGs} --program pyANI --method ANIb --use-full-percent-identity --min-full-percent-identity 0.90 --similarity-threshold 0.95
 
