@@ -115,6 +115,21 @@ JGI PROJECT ID: 503576
 
     READS=$(sed -n "$SLURM_ARRAY_TASK_ID"p x_file-names-of-reads-to-map.txt)
     bbmap.sh nodisk=true interleaved=true ambiguous=random in=/scratch/vineis.j/DEEP_CORE/QUALITY_READS/${READS}.filter-METAGENOME.fastq ref=x_ALL_MAGS_CONCATENATED.fa    out=${READS}.bam bamscript=to_bam.sh covstats=${READS}.covstats.txt scafstats=${READS}.scafstats.txt
+    
+#### The above is a bit older... here is an update to the way I mapped each sample to the collection of contigs for all MAGs reconstructed in this study.  I'm running it from my scratch directory... /scratch/vineis.j/DEEP_CORE/ALL-MAGS
+
+    #!/bin/bash
+    #
+    #SBATCH --nodes=1
+    #SBATCH --tasks-per-node=20
+    #SBATCH --mem=100Gb
+    #SBATCH --partition=short
+    #SBATCH --array=1-55
+
+
+    SAMPLE=$(sed -n "$SLURM_ARRAY_TASK_ID"p sample-names.txt)
+    fastq_file=$( echo "/work/jennifer.bowen/JOE/DEEP-CORE-GLOBUS-        DOWNLOAD/${SAMPLE}/QC_Filtered_Raw_Data/"*"fastq")
+    bbmap.sh nodisk=true interleaved=true ambiguous=random in=${fastq_file} ref=x_ALL_MAGS_CONCATENATED.fa out=MAPPING/${SAMPLE}.bam bamscript=to_bam.sh covstats=/MAPPING/covstats/${SAMPLE}.covstats.txt scafstats=/MAPPING/scafstats/${SAMPLE}.scafstats.txt
 
 ### 2. This command will result in a very useful file with an ending of *.scafstats.txt.* This file is key to calculating the relative abundance of each MAG across all samples. The first few lines looks like this. 
 
