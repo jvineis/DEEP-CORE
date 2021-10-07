@@ -312,4 +312,4 @@ JGI PROJECT ID: 503576
     fastspar_bootstrap --otu_table ${SAMPLE}-bases-recruited.tsv --number 1000 --prefix ${SAMPLE}-bootstrap_counts/
     mkdir ${SAMPLE}-bootstrap_correlation/
     parallel fastspar --otu_table {} --correlation ${SAMPLE}-bootstrap_correlation/cor_{/} --covariance ${SAMPLE}-bootstrap_correlation/cov_{/} -i 5 ::: ${SAMPLE}-bootstrap_counts/*
-    fastspar_pvalues --otu_table tests/data/fake_data.tsv --correlation ${SAMPLE}-correlation.tsv --prefix ${SAMPLE}-bootstrap_correlation/cor_fake_data_ --permutations 1000 --outfile ${SAMPLE}-pvalues.tsv
+    fastspar_pvalues --otu_table ${SAMPLE}-bases-recruited.tsv --correlation ${SAMPLE}-correlation.tsv --prefix ${SAMPLE}-bootstrap_correlation/cor_fake_data_ --permutations 1000 --outfile ${SAMPLE}-pvalues.tsv
