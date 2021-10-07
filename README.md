@@ -288,3 +288,28 @@ JGI PROJECT ID: 503576
     anvi-compute-genome-similarity -e x_${MAGs}-external-genomes.txt -o x_ANI-${MAGs} -T 40
     anvi-dereplicate-genomes --ani-dir x_ANI-${MAGs}/ -o x_ANI_dereplication-${MAGs} --program fastANI --method ANIb --use-full-percent-identity --min-full-percent-identity 0.90 --similarity-threshold 0.95
 
+# Relative abundance and network analysis:
+
+## 1. First make slections of only the shallow, mid, and deep mags and the bases recruited to each of the MAGs using the "deep-core-dereplicated-bases-raw-counts-shallow.tsv" and the "depth-mag-finder.txt" according to the following script.
+    
+    python ~/scripts/select-mags-from-dereplicated-bases-by-depth.py deep-core-dereplicated-bases-raw-counts.txt depth-mag-finder.txt
+    
+## 2. Move the files up to discovery and run the fastspar pipeline on each of them according to the script below ( working from here /scratch/vineis.j/deep-core-network-analysis/REAL-FASTSPAR-ANALYSIS). 
+
+    #!/bin/bash
+    #
+    #SBATCH --nodes=1
+    #SBATCH --tasks-per-node=20
+    #SBATCH --mem=200Gb
+    #SBATCH --partition=short
+    #SBATCH --array=1-3
+
+
+    SAMPLE=$(sed -n "$SLURM_ARRAY_TASK_ID"p samples-to-run.txt)
+
+    fastspar --iterations 100 --exclude_iterations 20 --otu_table ${SAMPLE}-bases-recruited.tsv --correlation ${SAMPLE}-correlation.tsv --covariance ${SAMPLE}-covariance.tsv --threshold 0.7 --threads 20
+    mkdir ${SAMPLE}-bootstrap_counts/
+    fastspar_bootstrap --otu_table ${SAMPLE}-bases-recruited.tsv --number 1000 --prefix ${SAMPLE}-bootstrap_counts/
+    mkdir ${SAMPLE}-bootstrap_correlation/
+    parallel fastspar --otu_table {} --correlation ${SAMPLE}-bootstrap_correlation/cor_{/} --covariance ${SAMPLE}-bootstrap_correlation/cov_{/} -i 5 ::: ${SAMPLE}-bootstrap_counts/*
+    fastspar_pvalues --otu_table tests/data/fake_data.tsv --correlation ${SAMPLE}-correlation.tsv --prefix ${SAMPLE}-bootstrap_correlation/cor_fake_data_ --permutations 1000 --outfile ${SAMPLE}-pvalues.tsv
