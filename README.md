@@ -322,3 +322,7 @@ JGI PROJECT ID: 503576
 
 
 
+## 4. Run the R command below to generate the group ids for each of the MAGs based on the network analysis.
+
+## 5. The output of the R command can be used to build a functional matrix for each of the groups in the network. 
+## The required KO data /Users/joevineis/Dropbox/DEEP-CORE/x_PFAM-KEGG-annotation/x_ALL-PFAM-KO-KEGG-tables/ALL-KEGG-O-table.txt
