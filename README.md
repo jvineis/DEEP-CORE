@@ -303,13 +303,22 @@ JGI PROJECT ID: 503576
     #SBATCH --mem=200Gb
     #SBATCH --partition=short
     #SBATCH --array=1-3
-
+    #
+    rm -rf *correlation#
+    rm -rf *counts
 
     SAMPLE=$(sed -n "$SLURM_ARRAY_TASK_ID"p samples-to-run.txt)
 
-    fastspar --iterations 100 --exclude_iterations 20 --otu_table ${SAMPLE}-bases-recruited.tsv --correlation ${SAMPLE}-correlation.tsv --covariance ${SAMPLE}-covariance.tsv --threshold 0.7 --threads 20
+    fastspar --iterations 1000 --exclude_iterations 20 --otu_table ${SAMPLE}-bases-recruited.tsv --correlation ${SAMPLE}-correlation.tsv --covariance ${SAMPLE}-covariance.tsv --threshold 0.7 --threads 20
     mkdir ${SAMPLE}-bootstrap_counts/
-    fastspar_bootstrap --otu_table ${SAMPLE}-bases-recruited.tsv --number 1000 --prefix ${SAMPLE}-bootstrap_counts/
+    fastspar_bootstrap --otu_table ${SAMPLE}-bases-recruited.tsv --number 1000 --prefix ${SAMPLE}-bootstrap_counts/${SAMPLE}
     mkdir ${SAMPLE}-bootstrap_correlation/
     parallel fastspar --otu_table {} --correlation ${SAMPLE}-bootstrap_correlation/cor_{/} --covariance ${SAMPLE}-bootstrap_correlation/cov_{/} -i 5 ::: ${SAMPLE}-bootstrap_counts/*
-    fastspar_pvalues --otu_table ${SAMPLE}-bases-recruited.tsv --correlation ${SAMPLE}-correlation.tsv --prefix ${SAMPLE}-bootstrap_correlation/cor_fake_data_ --permutations 1000 --outfile ${SAMPLE}-pvalues.tsv
+    fastspar_pvalues --otu_table ${SAMPLE}-bases-recruited.tsv --correlation ${SAMPLE}-correlation.tsv --prefix ${SAMPLE}-bootstrap_correlation/cor_${SAMPLE}_ --permutations 1000 --outfile ${SAMPLE}-pvalues.tsv
+    
+## 3. Now filter the correlation table according to the p-values produced by fastspar using this little custom python script. This will set any correlation value to zero if it has a pvalue above 0.002.
+
+    python ~/scripts/filter-cor-using-pvalue.py deep-core-shallow-correlation.tsv deep-core-shallow-pvalues.tsv deep-core-shallow-pval-corrected.tsv
+
+
+
