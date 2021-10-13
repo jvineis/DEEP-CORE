@@ -320,9 +320,77 @@ JGI PROJECT ID: 503576
 
     python ~/scripts/filter-cor-using-pvalue.py deep-core-shallow-correlation.tsv deep-core-shallow-pvalues.tsv deep-core-shallow-pval-corrected.tsv
 
+## 4. We tested several different community structure algorithyms to identify the groups based on the pvalue-filtered correlations. These included the walktrap, multilevel, mcl, and cluster_edge_betweenness (ceb). We settled on the ceb analysis because the fit/intention of the method aligns well with the goals of identifying MAGs that have high levels of connectivity and it is a well documented and highly cited approach "Finding and evaluating community structure in networks" Physical Review E M. E. J. Newman and M. Girvan. Belwo is the R command to run each of the analyese and the bash script to run the slurm submission.
 
+    #!/usr/bin/env R
+    library(vegan)
+    library(igraph)
+    library(MCL)
+    options <- commandArgs(trailingOnly=T) 
+    library("argparser")
 
-## 4. Run the R command below to generate the group ids for each of the MAGs based on the network analysis.
+    m_par <- arg_parser('Cluster-identification-and-stats of relative abundance correlations from sparcc')
+    m_par <- add_argument(m_par, "--d", help="The depth layer you wan to analyze, either deep shallow or mid")
+    m_par <- add_argument(m_par, "--o", help="the name of the outputfile for the pdf")
+    m_par <- add_argument(m_par, "--v", help="the cutoff for correlations to be considered")
+    m_par <- add_argument(m_par,  "--t", help="the name you would liek to use for the table of membership to MAG ids")
+    argv <- parse_args(m_par)
 
-## 5. The output of the R command can be used to build a functional matrix for each of the groups in the network. 
-## The required KO data /Users/joevineis/Dropbox/DEEP-CORE/x_PFAM-KEGG-annotation/x_ALL-PFAM-KO-KEGG-tables/ALL-KEGG-O-table.txt
+    dat = read.table(argv$d, row.names = 1, header = TRUE, sep = '\t')
+  
+    pdf(argv$o)
+
+    # set the cutoff to include correlation.
+    sparcc.cutoff.c <- argv$v
+    # filter the adjacency matrix based on the cutoff
+    sparcc.adj <- ifelse(abs(dat) >= sparcc.cutoff.c, 1, 0)
+    # Build the network
+    sparcc.net <- graph.adjacency(sparcc.adj, mode = "undirected", diag = FALSE)
+    #calculate the community based on the wt method
+    wt <- walktrap.community(sparcc.net)
+    #calculate the commynity based on the ml method
+    ml <- multilevel.community(sparcc.net)
+    #calculate the community based on the mcl method
+    adj <- as_adjacency_matrix(sparcc.net)
+    mc <- mcl(adj, addLoops = TRUE)
+
+    #report the output from each.. would be great to write these to an output.. but we are not there yet
+    print(argv$d)
+    print(argv$v)
+    wt
+    ml
+    max(mc$Cluster)
+
+    # Now run the cluster_edge-betweeness analysis and make a pretty plot to see the clusters.
+    ceb <- cluster_edge_betweenness(sparcc.net)
+    plot(ceb, sparcc.net, vertex.label=NA)
+    dev.off()
+    print("Output of cluster_edge_betweenness")
+    print("nuber of ceb communities")
+    length(ceb)
+    print("modularity")
+    modularity(ceb)
+    write.table(as.matrix(membership(ceb)), argv$t, sep = '\t')
+    
+#### Now the slurm script to run the above R command for the three different depths. the file "layers-to-run.tx" contains the text deep shallow mid each on their own line and the script has to be altered if you want to use a differet cutoff for correlation
+
+    #!/bin/bash
+    #
+    #SBATCH --nodes=1
+    #SBATCH --tasks-per-node=10
+    #SBATCH --time=08:00:00
+    #SBATCH --mem=100Gb
+    #SBATCH --partition=short
+    #SBATCH --array=1-3
+
+    SAMPLE=$(sed -n "$SLURM_ARRAY_TASK_ID"p layers-to-run.txt)
+
+    Rscript run-igraph-to-identify-groups.R --d deep-core-${SAMPLE}-pval-corrected.tsv --o deep-core-${SAMPLE}-groups-0.5.pdf --t deep-core-${SAMPLE}-0.5-group-identity.txt --v 0.5
+
+## 5. The output of the R command (e.g. deep-core-deep-0.9-group-identity.txt) can be used to build a functional matrix for each of the groups in the network. We are only using the groups with a correlation of 0.9 or greater going forward. We want to build a functional matrix containing only the MAGs within each of the groups identified by ceb analysis so we can visualize some of the groups with GEPH. We also apply the group ID to the MAGs so we can estimate the dispersion among the groups and test for differences among the groups using a multivarite approach. The required KO data /Users/joevineis/Dropbox/DEEP-CORE/x_PFAM-KEGG-annotation/x_ALL-PFAM-KO-KEGG-tables/ALL-KEGG-O-table.txt. The script below can be run on each of the "group-identity.txt" files in order to create a separate matrix that cna be run for betadispersion analysis. Only the groups containing between 6-50 members are included int he analysis. Working here /work/jennifer.bowen/JOE/DEEP-CORE/NETWORK-ANALYSIS/2-FUNCTIONAL-DIVERSITY-OF-GROUPS
+
+#### Collect the functional potential for the MAGs that are included in groups with between 6-50 members fore each of the nutrient layers. Below is an example for the mid layer
+
+    python select-mags-from-ko-matrix.py ../1_IDENTIFYING-GROUPS/deep-core-mid-0.9-group-identity-fix.txt ALL-KEGG-O-table.txt
+    
+#### The script above produces metadata and a functional table that can be used as input to detect the dispersion among the groups.  The script will also produce individual functional tables for each group that can be used to build GEPHI images. Be careful to remove the functions that are found in less than 1 or 2 percent of all MAGs.  There may be zero sums for many of the functions in the tables and they will need to be removed prior to the betadisper or GEPHI analysis. 
