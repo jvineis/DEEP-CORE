@@ -406,3 +406,12 @@ JGI PROJECT ID: 503576
     python 
 
 ## 3. We want to combine this metadata with the pfam annotation of the MAGs. The KEGG is nice, but does not provide the resolution we need to be able to detect differences in the cetroid among the shallow, mid, and deep layers. Here are the lines used to analyze the pfam data and run the analysis for groups that are. Its also important to run the test of differences among the closely correlated groups within the context of all the MAGs.. Although we have tested for this within the shallow, mid, and deep... the analysis has always been limited to include only MAGs that have a group assignment to a particular group that contains a minimum or maximum number of MAGs. The analysis be
+
+
+
+### Some analysis in R to test for differences among the depth layers for things includind centroid distances and frequency histograms for the different group sizes recovered for each layer.
+
+#### Lets start with the frequency histogram. First make a table that contains the count of each bin.  The table and the script are found in this git. 
+
+    python ~/scripts/count-group-ocurrences-for-frequency-hist.py deep-core-all-0.9-group-identity.txt deep-core-all-0.9-group-size.txt
+
