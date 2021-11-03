@@ -411,7 +411,10 @@ JGI PROJECT ID: 503576
 
 ### Some analysis in R to test for differences among the depth layers for things includind centroid distances and frequency histograms for the different group sizes recovered for each layer.
 
-#### Lets start with the frequency histogram. First make a table that contains the count of each bin.  The table and the script are found in this git. 
+#### Lets start with the frequency histogram. First make a table that contains the count of each bin.  The table and the script are found in this git. This will remove groups with a size of 1.
 
     python ~/scripts/count-group-ocurrences-for-frequency-hist.py deep-core-all-0.9-group-identity.txt deep-core-all-0.9-group-size.txt
+
+#### Now we can use R to make the histogram found in the supplemental of the manuscript
+
 
