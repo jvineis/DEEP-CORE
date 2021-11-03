@@ -3,6 +3,7 @@ import sys
 from collections import Counter
 
 outfile = open(sys.argv[2], 'w')
+outfile.write("group"+'\t'+"count"+'\t'+"layer"+'\n')
 depth_group = []
 for i in open(sys.argv[1], 'r'):
     x = i.strip().split('\t')
