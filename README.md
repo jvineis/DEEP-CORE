@@ -415,6 +415,34 @@ JGI PROJECT ID: 503576
 
     python ~/scripts/count-group-ocurrences-for-frequency-hist.py deep-core-all-0.9-group-identity.txt deep-core-all-0.9-group-size.txt
 
-#### Now we can use R to make the histogram found in the supplemental of the manuscript
+#### Now we can use R to make the histogram found in the supplemental of the manuscript. Here is the R code for this.
+
+## draw a frequency histogram for the ocurrence of group size for each sample
+
+    library(ggplot2)
+
+    ## Read in the data
+    dat = read.table("~/Dropbox/DEEP-CORE/MODELS-AND-R/deep-core-all-0.9-group-size.txt", header = TRUE, row.names = 1)
+    dat = data.frame(dat)
+    # Make the plot
+    ## borrowing this from here https://stackoverflow.com/questions/6957549/overlaying-histograms-with-ggplot2-in-r
+    plot_multi_histogram <- function(df, feature, label_column) {
+      plt <- ggplot(df, aes(x=eval(parse(text=feature)), fill=eval(parse(text=label_column)))) +
+      scale_fill_manual(values = c("bisque4","tan1","lightgoldenrod"))+
+      geom_density(alpha=0.8) +
+      labs(x=feature, y = "Density")
+      plt + guides(fill=guide_legend(title=label_column))
+    }
+
+    ## Run the plot
+    pdf("~/Dropbox/DEEP-CORE/DRAFTS-and-figures/group-count-by-layer-histogram-supplemental.pdf")
+    plot_multi_histogram(dat, 'count', 'layer')
+    dev.off()
+    ## Run a simple anova 
+    summary(aov(dat$count~dat$layer))
+
+## The biogeochemisty analysis can be run like this using the R code found in this directory along with the necessary files. Below I'm running the script in default mode, which will use the default files but there are flags if you want to use other files as input 
 
 
+
+    
