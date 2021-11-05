@@ -443,6 +443,18 @@ JGI PROJECT ID: 503576
 
 ## The biogeochemisty analysis can be run like this using the R code found in this directory along with the necessary files. Below I'm running the script in default mode, which will use the default files but there are flags if you want to use other files as input 
 
+    Rscript DEEP-CORE-MODELS.R
+    
+### The Analysis of group stats that are contained in Table 1 of the manuscript. Begins with the running the script below on each of the different depth-group files, then concatenating them, then downloading the concatenated file, removing duplicate lines and groups that are not represented by all depths (in this case it was all groups that contained more than 5 members).
+
+#### 1. Start on discovery (or a cluster) to run the following sbatch script. 
+
+
+    fill this part in regarding the x_select...
+    \
+#### 2. Then run this script to condense the data down into a digestible Table 1.
+
+    python ~/scripts/summarize-all-group-stats.py ALL-GROUP-STATS.txt ALL-GROUP-SUMMARY.txt
 
 
     
