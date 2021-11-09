@@ -487,7 +487,42 @@ JGI PROJECT ID: 503576
  
 ### Here are the steps to create the files required to reconstruct the gephi-anvio funcional group displays for the groups containing 5 members (or other member sized groups). These figures are either in supplememtal or ended up in the manuscript.
 
-#### 1. On discovery: 
+#### 1. On discovery: There are files produced by the above ~/scripts/summarize-all-group-stats.py within a directory here. /work/jennifer.bowen/JOE/DEEP-CORE/NETWORK-ANALYSIS/2-FUNCTIONAL-DIVERSITY-OF-GROUPS/GROUP-GEPHI-FILES. I move the files from this directory (e.g. deep-group130-5-5.txt) to a new location so that I can work on analysis of specific group member sizes. For example the analysis of deep group with five members can be found here. /work/jennifer.bowen/JOE/DEEP-CORE/NETWORK-ANALYSIS/2-FUNCTIONAL-DIVERSITY-OF-GROUPS/5-MEMBER/deep-gephi. Then I concatenate these files, copy the KOfam tables to the directory, and then merge the tables to create a gephi nodes and edges file according to the steps below. 
+
+    cat deep-group*5-5.txt > all-deep-5-5.txt 
+    for i in `cat all-deep-5-5.txt`; do cp /work/jennifer.bowen/JOE/DEEP-CORE/ALL-MAGS/x_ALL-pfam-kofam/$i-KOfam.txt .; done
+    sbatch x_run-pfams-and-kegg-merge.shx
+    
+##### The x_run-pfams-and-kegg-merge.shx looks like this and it is contained in each of the directories that I have constructed anvio and gephi figures. The ~/scripts/combine-anvi-function-tables.py file can be found in this git.
+    
+    #!/usr/bin/bash
+
+    #
+    #SBATCH --nodes=1
+    #SBATCH --tasks-per-node=5
+    #SBATCH --time=10:00:00
+    #SBATCH --mem=200Gb
+    #SBATCH --partition=short
+    python ~/scripts/combine-anvi-function-tables.py -d /work/jennifer.bowen/JOE/DEEP-CORE/NETWORK-ANALYSIS/2-FUNCTIONAL-DIVERSITY-OF-GROUPS/5-MEMBER/deep-
+    gephi/ -o /work/jennifer.bowen/JOE/DEEP-CORE/NETWORK-ANALYSIS/2-FUNCTIONAL-DIVERSITY-OF-GROUPS/5-MEMBER/deep-gephi/deep-5-5 -s /work/jennifer.bowen/JOE
+    /DEEP-CORE/NETWORK-ANALYSIS/2-FUNCTIONAL-DIVERSITY-OF-GROUPS/5-MEMBER/deep-gephi/all-deep-5-5.txt -t ko
+
+#### 2. Then I move the gephi files to a location on my local machine here /Users/joevineis/Dropbox/DEEP-CORE/MODELS-AND-R/NETWORKS-fastspar/REAL-FASTSPAR-ANALYSIS/GEPHI-FOR-GROUPS/5-MEMBERS to build gephi and anvio plots using the following steps. The directory where I would be working on the figures and anvio plots produced in this directory are here /Users/joevineis/Dropbox/DEEP-CORE/ANVIO-VISUALIZATION/Functional-annotation-tax-and-groups/FOR-GROUP-GEPHI-DISPLAYS/ . Python scripts and reference files can be found in this repository.
+
+    rsync -HalP vineis.j@discovery.neu.edu:/work/jennifer.bowen/JOE/DEEP-CORE/NETWORK-ANALYSIS/2-FUNCTIONAL-DIVERSITY-OF-GROUPS/5-MEMBER/*gephi/*gephi* .
+    cut -f 1 -d "," shallow-5-5-gephi-nodes.csv | grep s_Sal > ~/Dropbox/DEEP-CORE/ANVIO-VISUALIZATION/Functional-annotation-tax-and-groups/FOR-GROUP-GEPHI-DISPLAYS/shallow-5-5.txt   
+    python get-groups-from-deep-core-functional-table.py shallow-5-5.txt shallow-5-5-for-anvio-display.txt
+    python ~/scripts/add-taxonomy-to-gephi-nodes.py shallow-5-5-gephi-nodes.csv shallow-5-5-gephi-nodes-w-tax.csv
+    
+    
+#### 3. now you have file as inputs for gephi shallow-5-5-gephi-nodes-w-tax.csv and shallow-5-5-gephi-edges.csv that you can load into gephi and reproduce the networks and the anvio input file that you can run usig the manual-mode flag like this. 
+
+    sudo anvi-interactive -d x_ALL-potential-fun-groups-and-tax-matching-ribosomal-25.txt -p x_ALL-potential-fun-groups-and-tax-matching-ribosomal-25.db -t x_phylogenomic-ribosomal-25.tre --manual-mode
+
+    
+    
+    
+    
 
     
 
