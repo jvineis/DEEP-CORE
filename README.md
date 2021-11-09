@@ -447,14 +447,48 @@ JGI PROJECT ID: 503576
     
 ### The Analysis of group stats that are contained in Table 1 of the manuscript. Begins with the running the script below on each of the different depth-group files, then concatenating them, then downloading the concatenated file, removing duplicate lines and groups that are not represented by all depths (in this case it was all groups that contained more than 5 members).
 
-#### 1. Start on discovery (or a cluster) to run the following sbatch script. 
+#### 1. Start on discovery (or a cluster) to run the following sbatch script. The layers-to-run file contains a listing of each file that you would like to run containing the group identity for each layer analyzed.. eg "deep-core-deep-0.9-group-identity-fix.txt".
+    
+    #!/bin/sh
+    #SBATCH --nodes=1
+    #SBATCH --tasks-per-node=10
+    #SBATCH --time=08:00:00
+    #SBATCH --mem=100Gb
+    #SBATCH --partition=short
+    #SBATCH --array=1-3
 
 
-    fill this part in regarding the x_select...
-    \
+    SAMPLE=$(sed -n "$SLURM_ARRAY_TASK_ID"p layers-to-run.txt)
+
+    #python ~/scripts/select-mags-from-ko-matrix.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 2 --ma 20
+
+    #python ~/scripts/select-mags-from-ko-matrix.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 21 --ma 400
+
+    python ~/scripts/select-mags-from-ko-matrix.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 2 --ma 2
+    python ~/scripts/select-mags-from-ko-matrix.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 3 --ma 3
+    python ~/scripts/select-mags-from-ko-matrix.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 4 --ma 4
+    python ~/scripts/select-mags-from-ko-matrix.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 5 --ma 5
+    python ~/scripts/select-mags-from-ko-matrix.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 6 --ma 6
+    python ~/scripts/select-mags-from-ko-matrix.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 7 --ma 7
+    python ~/scripts/select-mags-from-ko-matrix.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 8 --ma 8
+    python ~/scripts/select-mags-from-ko-matrix.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 9 --ma 9
+    python ~/scripts/select-mags-from-ko-matrix.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 10 --ma 10
+
+    #python ~/scripts/select-mags-from-ko-matrix-w-tax-filter.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 2 --ma 400
+
+    #python ~/scripts/select-mags-from-ko-matrix-w-completion-filter.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 2 --ma 20
+
+    #python ~/scripts/select-mags-from-ko-matrix-w-completion-filter.py --i ../1_IDENTIFYING-GROUPS/${SAMPLE} --k ALL-KEGG-O-table.txt --m 21 --ma 400
+    
 #### 2. Then run this script to condense the data down into a digestible Table 1.
 
+    cat *MEMBER/*stats_table.txt > ALL-GROUP-STATS.txt
     python ~/scripts/summarize-all-group-stats.py ALL-GROUP-STATS.txt ALL-GROUP-SUMMARY.txt
+ 
+### Here are the steps to create the files required to reconstruct the gephi-anvio funcional group displays for the groups containing 5 members (or other member sized groups). These figures are either in supplememtal or ended up in the manuscript.
 
+#### 1. On discovery: 
+
+    
 
     
