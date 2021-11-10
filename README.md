@@ -518,12 +518,3 @@ JGI PROJECT ID: 503576
 #### 3. now you have file as inputs for gephi shallow-5-5-gephi-nodes-w-tax.csv and shallow-5-5-gephi-edges.csv that you can load into gephi and reproduce the networks and the anvio input file that you can run usig the manual-mode flag like this. 
 
     sudo anvi-interactive -d x_ALL-potential-fun-groups-and-tax-matching-ribosomal-25.txt -p x_ALL-potential-fun-groups-and-tax-matching-ribosomal-25.db -t x_phylogenomic-ribosomal-25.tre --manual-mode
-
-    
-    
-    
-    
-
-    
-
-    
